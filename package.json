@@ -1,0 +1,17 @@
+{
+  "name": "healthweb",
+  "version": "1.0.0",
+  "description": "hyper monitor",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "hmr"
+  ],
+  "author": "i",
+  "license": "ISC",
+  "dependencies": {
+    "firebase": "^10.0.0"
+  }
+}

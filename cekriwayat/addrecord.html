@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Add Record</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #b2ddd4;
+      color: #555;
+      padding: 15px;
+    }
+
+    nav ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      background-color: #f4f4f4;
+    }
+
+    nav ul li {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+    }
+
+    nav ul li a {
+      text-decoration: none;
+      color: #555;
+      font-weight: bold;
+    }
+
+    main {
+      padding: 20px;
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      margin-bottom: 10px;
+    }
+
+    button {
+      background-color: #b2ddd4;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #555;
+    }
+
+    footer {
+      background-color: #f4f4f4;
+      padding: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+  <script src="firebase-config.js"></script>
+  
+  <header>
+    <h1>Add New Record</h1>
+  </header>
+
+  <main>
+    <h2>Tambah Rekam Medis</h2>
+    <form id="recordForm">
+      <label for="noPasien">No Pasien:</label>
+      <input type="text" id="noPasien" name="noPasien" placeholder="Masukkan nomor pasien" required>
+
+      <label for="nama">Nama Pasien:</label>
+      <input type="text" id="nama" name="nama" placeholder="Masukkan nama pasien" required>
+      
+      <label for="umur">Umur:</label>
+      <input type="text" id="umur" name="umur" placeholder="Masukkan umur pasien" required>
+     
+      <label for="sex">Sex (F/M):</label>
+      <input type="text" id="sex" name="sex" placeholder="Masukkan jenis kelamin pasien" required>
+
+      <label for="bmi">BMI:</label>
+      <textarea id="bmi" name="bmi" placeholder="Masukkan BMI pasien" required></textarea>
+      
+      <label for="heartRate">Heart Rate:</label>
+      <textarea id="heartRate" name="heartRate" placeholder="Masukkan denyut jantung pasien" required></textarea>
+
+      <label for="height">Height:</label>
+      <textarea id="height" name="height" placeholder="Masukkan tinggi pasien" required></textarea>
+
+      <label for="weight">Weight:</label>
+      <textarea id="weight" name="weight" placeholder="Masukkan berat pasien" required></textarea>
+
+      <label for="file">File:</label>
+      <input type="file" id="file" name="file" required>
+
+      <button type="submit">Simpan</button>
+      <button onclick="window.location.href = 'index.html';" type="button">Beranda</button>
+    </form>
+  </main>
+
+  <footer>
+    <p>&copy; 2023 Tambah Rekam Medis Pasien. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // JavaScript code
+    const recordForm = document.getElementById("recordForm");
+    recordForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      // Mengambil nilai-nilai dari elemen input
+      const noPasien = document.getElementById("noPasien").value;
+      const nama = document.getElementById("nama").value;
+      const umur = document.getElementById("umur").value;
+      const sex = document.getElementById("sex").value;
+      const bmi = document.getElementById("bmi").value;
+      const heartRate = document.getElementById("heartRate").value;
+      const height = document.getElementById("height").value;
+      const weight = document.getElementById("weight").value;
+      const file = document.getElementById("file").files[0];
+
+      // Buat objek data yang akan dikirim ke Firebase
+      const newRecord = {
+        noPasien: noPasien,
+        nama: nama,
+        umur: umur,
+        sex: sex,
+        bmi: bmi,
+        heartRate: heartRate,
+        height: height,
+        weight: weight,
+        file: file.name
+      };
+
+      // Simpan data ke database Firebase
+      const recordsRef = firebase.database().ref("records");
+      recordsRef.push(newRecord)
+        .then((snapshot) => {
+          const recordId = snapshot.key;
+
+          // Create a storage reference for the file
+          const storageRef = firebase.storage().ref().child("files/" + file.name);
+
+          // Upload file to Firebase Storage
+          const uploadTask = storageRef.put(file);
+
+          // Listen for state changes, errors, and completion of the upload
+          uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+              // Track the upload progress
+            },
+            (error) => {
+              // Handle errors during upload
+              console.error("Error uploading file to Firebase Storage: ", error);
+            },
+            () => {
+              // Upload completed successfully, get the download URL of the file
+              uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                // Update the file field of the record in the database with the download URL
+                recordsRef.child(recordId).update({ file: downloadURL })
+                  .then(() => {
+                    // Display success message and reset the form
+          alert("Data berhasil disimpan ke Firebase.");
+          // Reset form setelah data berhasil disimpan
+          recordForm.reset();
+        })
+        .catch((error) => {
+          console.error("Error adding record to Firebase: ", error);
+        });
+    });
+  })
+})
+        })
+  </script>
+</body>
+</html>

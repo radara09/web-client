@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cek Riwayat</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #b2ddd4;
+      color: #555;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    nav ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      background-color: #f4f4f4;
+    }
+
+    nav ul li {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+    }
+
+    nav ul li a {
+      text-decoration: none;
+      color: #555;
+      font-weight: bold;
+    }
+
+    main {
+      padding: 20px;
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #cccccce3;
+      border-radius: 4px;
+      box-sizing: border-box;
+      margin-bottom: 10px;
+    }
+
+    button {
+      background-color: #b2ddd4;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #555;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ccc;
+    }
+
+    th {
+      background-color: #f4f4f4;
+    }
+
+    footer {
+      background-color: #f4f4f4;
+      padding: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Cek Riwayat Pasien</h1>
+    <button id="keluarButton">Keluar</button>
+  </header>
+  <nav>
+    <ul>
+      <li><a href="index.html">Beranda</a></li>
+      <li><a href="addrecord.html">Add Record</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <h2>Pilih Pasien</h2>
+    <form id="recordForm">
+      <label for="pasien">Nama Pasien:</label>
+      <select id="pasien" name="pasien"></select>
+      <button type="submit">Cek Riwayat</button>
+    </form>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Nama</th>
+          <th>Last Update Data Pasien</th>
+        </tr>
+      </thead>
+      <tbody> 
+        <tr>
+          <td id="nama-pasien"></td>
+          <td id="last-update"></td>
+        </tr>
+      </tbody>
+    </table>
+  </main>
+
+  <footer>
+    <p>&copy; 2023 Cek Riwayat Pasien. All rights reserved.</p>
+  </footer>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+
+  <script>
+    // Initialize Firebase
+    const firebaseConfig = {
+    apiKey: "AIzaSyBfwJoBt2kT0iOMjlDBw_heFaqjwjlp5ZU",
+    authDomain: "medical-record-7557a.firebaseapp.com",
+    databaseURL: "https://medical-record-7557a-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "medical-record-7557a",
+    storageBucket: "medical-record-7557a.appspot.com",
+    messagingSenderId: "973084416066",
+    appId: "1:973084416066:web:50c8c2831db284a7e835db",
+    measurementId: "G-MZ9NN8VEQZ"
+  };
+    // Inisialisasi aplikasi Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+
+    // Referensi database Firebase
+    const database = firebase.database();
+
+    // Mendapatkan referensi pasien dari Firebase Realtime Database
+    const pasienRef = database.ref('records');
+
+    // Mengambil data pasien dari Firebase Realtime Database
+    pasienRef.on('value', (snapshot) => {
+      const pasienOptions = [];
+      snapshot.forEach((childSnapshot) => {
+        const pasien = childSnapshot.val();
+        pasienOptions.push(`<option value="${childSnapshot.key}">${pasien.nama}</option>`);
+      });
+      document.getElementById('pasien').innerHTML = pasienOptions.join('');
+    });
+
+   // Mengatur penanganan submit form
+   document.getElementById('recordForm').addEventListener('submit', (e) => {
+      e.preventDefault(); // Mencegah form melakukan submit
+
+      // Mendapatkan nilai 'pasien' dari form
+      const selectedPasienId = document.getElementById('pasien').value;
+      // Menyimpan nilai 'selectedPasienId' ke localStorage
+      localStorage.setItem('selectedPasienId', selectedPasienId);
+
+      // Membuat URL tujuan dengan memasukkan nilai 'id' pada URL yang akan dipanggil
+      const destinationURL = `riwayatpasien.html?id=${selectedPasienId}`;
+
+      // Mengarahkan halaman ke URL tujuan
+      window.location.href = destinationURL;
+  });
+  // Menambahkan event click pada button "Keluar"
+  const keluarButton = document.getElementById('keluarButton');
+  keluarButton.addEventListener('click', () => {
+    window.location.href = 'C:\\xampp\\htdocs\\healthweb\\index.html';
+  });
+  </script>
+</body>
+</html>
